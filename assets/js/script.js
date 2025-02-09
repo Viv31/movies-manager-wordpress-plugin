@@ -1,29 +1,36 @@
 jQuery(document).ready(function($) {
-    $('#ajax-button').on('click', function() {
-        var name = $('#name-input').val(); // Get input value
+    
+    function fetchMovies() {
+        var searchText = $("#mm_search_by_text").val();
+        var searchBy = $("#search_by_meta_fields").val();
+        var sortBy = $("#sort_by_az_za").val();
 
         $.ajax({
-            type: 'POST',
-            url: mm_ajax_plugin.ajax_url, // Use localized AJAX URL
+            url:  mm_ajax_plugin.ajax_url, // Use localized AJAX URL,
+            type: "POST",
             data: {
-                action: 'mm_custom_action', // Action hook for PHP
+                action: "fetch_movies",
                 security: mm_ajax_plugin.nonce, // Nonce for security
-                name: name // Send user input
+                search_text: searchText,
+                search_by: searchBy,
+                sort_by: sortBy,
             },
             beforeSend: function() {
-                $('#ajax-button').text('Processing...').prop('disabled', true);
+                $(".table tbody").html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
             },
             success: function(response) {
-                $('#ajax-response').html('<p>' + response.message + '</p>');
-                console.log(response); // Debugging
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', status, error);
-                $('#ajax-response').html('<p style="color:red;">AJAX request failed.</p>');
-            },
-            complete: function() {
-                $('#ajax-button').text('Send AJAX').prop('disabled', false);
+                $(".table tbody").html(response);
             }
         });
+    }
+
+    jQuery("#mm_search_by_text, #search_by_meta_fields, #sort_by_az_za").on("input change", function() {
+        fetchMovies();
+    });
+
+    // Load more button (optional)
+    jQuery(".btn-warning").on("click", function() {
+        fetchMovies();
     });
 });
+
